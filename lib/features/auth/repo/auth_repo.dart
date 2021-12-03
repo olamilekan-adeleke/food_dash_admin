@@ -17,7 +17,7 @@ class AuthenticationRepo {
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
   static final LocaldatabaseRepo localdatabaseRepo =
       GetIt.instance<LocaldatabaseRepo>();
-  final CollectionReference<dynamic> userCollectionRef =
+  final CollectionReference<dynamic> adminCollectionRef =
       FirebaseFirestore.instance.collection('admin');
 
   LoginUserModel? userFromFirestore(User? user) {
@@ -49,6 +49,10 @@ class AuthenticationRepo {
     String password,
   ) async {
     try {
+      if (await isUserExist(email) == true) {
+        throw 'User does not exist!';
+      }
+
       final UserCredential userCredential =
           await _firebaseAuth.signInWithEmailAndPassword(
         email: email,
@@ -182,7 +186,7 @@ class AuthenticationRepo {
   }
 
   Future<void> addUserDataToFirestore(RiderDetailsModel userDetails) async {
-    await userCollectionRef
+    await adminCollectionRef
         .doc(userDetails.uid)
         .set(userDetails.toMapForLocalDb());
     infoLog('Added User database', title: 'Add user data To Db');
@@ -190,7 +194,7 @@ class AuthenticationRepo {
 
   Future<void> updateUserData(RiderDetailsModel userDetails) async {
     try {
-      await userCollectionRef.doc(userDetails.uid).update(userDetails.toMap());
+      await adminCollectionRef.doc(userDetails.uid).update(userDetails.toMap());
       await localdatabaseRepo.saveUserDataToLocalDB(userDetails.toMap());
       infoLog('Upadted User database', title: 'Upadted user data To Db');
     } catch (e, s) {
@@ -202,12 +206,26 @@ class AuthenticationRepo {
 
   Future<Map<String, dynamic>> getLoggedInUser(String email) async {
     final QuerySnapshot<dynamic> querySnapshot =
-        await userCollectionRef.where('email', isEqualTo: email).get();
+        await adminCollectionRef.where('email', isEqualTo: email).get();
 
-    if (querySnapshot.docs.isEmpty) throw 'No user found!';
+    if (querySnapshot.docs.isEmpty) {
+      await signOut();
+      throw 'No user found!';
+    }
 
     final DocumentSnapshot<dynamic> documentSnapshot = querySnapshot.docs.first;
 
     return documentSnapshot.data() as Map<String, dynamic>;
+  }
+
+  Future<bool> isUserExist(String email) async {
+    final QuerySnapshot<dynamic> querySnapshot =
+        await adminCollectionRef.where('email', isEqualTo: email).get();
+
+    if (querySnapshot.docs.isNotEmpty) {
+      return false;
+    }
+
+    return true;
   }
 }
