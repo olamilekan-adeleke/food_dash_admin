@@ -33,7 +33,7 @@ class EditRiderFeeScreen extends StatelessWidget {
       loading.value = false;
       feeTextEditingController.clear();
       FocusScope.of(context).unfocus();
-      
+
       CustomSnackBarService.showSuccessSnackBar('Updated!');
     } catch (e) {
       loading.value = false;
@@ -49,7 +49,8 @@ class EditRiderFeeScreen extends StatelessWidget {
         child: Column(
           children: [
             SizedBox(height: sizerSp(20.0)),
-            const HeaderWidget(iconData: null, title: 'Change Rider Fee'),
+            const HeaderWidget(
+                iconData: null, title: 'Change Rider Commission'),
             SizedBox(height: sizerSp(30.0)),
             const SizedBox(height: 20.0),
             StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
@@ -74,17 +75,17 @@ class EditRiderFeeScreen extends StatelessWidget {
                   }
 
                   final Map<String, dynamic>? data = snapshot.data?.data();
-                  final int fee = data != null ? data['fee'] : 0;
+                  final int fee = data != null ? data['percentage'] : 0;
 
                   return CustomTextWidget(
-                    text: '\u20A6  ${currencyFormatter(fee)}',
+                    text: '$fee %',
                     fontWeight: FontWeight.bold,
                     fontSize: sizerSp(30),
                   );
                 }),
             const SizedBox(height: 10.0),
             CustomTextWidget(
-              text: 'Above is the current Rider Delivery fee',
+              text: 'Above is the current Rider Delivery Commission',
               fontWeight: FontWeight.w200,
               fontSize: sizerSp(14),
             ),
@@ -92,10 +93,10 @@ class EditRiderFeeScreen extends StatelessWidget {
             CustomTextField(
               textEditingController: feeTextEditingController,
               textInputType: TextInputType.number,
-              hintText: 'Change Rider Fee',
-              labelText: 'Rider Fee',
+              hintText: 'Change Rider Commission',
+              labelText: 'Rider Commission',
               validator: (String? text) =>
-                  formFieldValidator(text, 'Rider Fee', 1),
+                  formFieldValidator(text, 'Rider Commission', 1),
             ),
             const Spacer(),
             ValueListenableBuilder(
