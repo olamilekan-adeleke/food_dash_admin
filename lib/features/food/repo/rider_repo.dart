@@ -204,12 +204,12 @@ class RiderRepo {
   }
 
   Future<void> changeDeliveryFee(int fee) async {
-    await constantsCollectionRef.doc('delivery_fee_per_kilometer').update({'fee': fee});
+    await constantsCollectionRef
+        .doc('delivery_fee_per_kilometer')
+        .set({'fee': fee});
   }
 
   Future<void> changeRiderFee(int fee) async {
     await constantsCollectionRef.doc('rider_fee').update({'fee': fee});
   }
 }
-
-
